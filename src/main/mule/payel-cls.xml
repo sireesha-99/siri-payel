@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="271e859c-089d-4075-9688-831a56d5ab11" >
+		<http:listener-connection host="localhost" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="42b357dd-d83a-473e-b350-44f07595cd2e" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="No217353" database="office" />
+	</db:config>
+	<flow name="payel-clsFlow" doc:id="602e6957-1407-45ee-8621-4ff926aaed2e" >
+		<http:listener doc:name="Listener" doc:id="0c7b8858-72c6-4428-8ac7-4d0635d7fc5e" config-ref="HTTP_Listener_config" path="/payel"/>
+		<ee:transform doc:name="Transform Message" doc:id="9aec60f1-5a72-4bec-8746-081b430817bb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "name": "siri",
+    "lname": "payel"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="select" doc:id="a329af95-fc67-44ad-a970-9f388efeb16e" >
+		<http:listener doc:name="Listener" doc:id="d8d88138-5003-420e-ac18-95a0440b93df" config-ref="HTTP_Listener_config" path="/siri"/>
+		<db:select doc:name="Select" doc:id="597ec5e4-38c6-432d-8ed6-22232e55c784" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from siri where fname=:fname;]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{'fname':attributes.queryParams.fname}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="e57d811b-a811-4197-ac90-c30752f8d3a4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="insert" doc:id="0ba44ca5-d4ef-4539-9b2c-c7f6d1835143" >
+		<http:listener doc:name="Listener" doc:id="fc902e56-06c7-4006-b8c2-0e0ed64146de" config-ref="HTTP_Listener_config" path="/siri1"/>
+		<db:insert doc:name="Insert" doc:id="588e7082-c479-4d36-abaf-137243838e51" config-ref="Database_Config">
+			<db:sql ><![CDATA[insert into siri(id,fname,lname,age) values(4,'nazma','sk',40);]]></db:sql>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="0ad51176-14e2-4bbb-82f5-a29e3808265c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:select doc:name="Select" doc:id="b134ef3d-00ee-44d1-bcff-e68066112f00" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from siri;]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="2986ba94-62c0-4eca-ad2d-fc27262ce0d5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="delete" doc:id="9c3fc1c3-880e-48c3-af2b-b401ea1ce43c" >
+		<http:listener doc:name="Listener" doc:id="16b48931-2d6f-4dd1-b52e-37d05ec0c09e" config-ref="HTTP_Listener_config" path="/siri2"/>
+		<db:delete doc:name="Delete" doc:id="454e0330-92c8-4df8-8a34-63dde1ff051e" config-ref="Database_Config">
+			<db:sql ><![CDATA[delete from siri where fname = 'payel';]]></db:sql>
+		</db:delete>
+		<ee:transform doc:name="Transform Message" doc:id="4d671fb3-50bb-43f5-bf47-6889562286d5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:select doc:name="Select" doc:id="392797c4-a288-4ee5-bf2b-b454fc6b958b" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from siri;]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="9b3a4248-789f-4af3-b3e9-57fd24082847" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="update" doc:id="9f252bfe-3521-4247-8bc0-a662cf66c45e" >
+		<http:listener doc:name="Listener" doc:id="03e78849-a41a-40ad-91df-fd386d5bb696" config-ref="HTTP_Listener_config" path="/siri3"/>
+		<db:update doc:name="Update" doc:id="cf9bffe1-ea4c-4654-b306-8d09bb9d69be" config-ref="Database_Config">
+			<db:sql ><![CDATA[update siri set fname = 'payel' where id=1;]]></db:sql>
+		</db:update>
+		<ee:transform doc:name="Transform Message" doc:id="d22935ac-bf4b-481e-ae67-9bbc9256ec9b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:select doc:name="Select" doc:id="1972b930-264b-4804-8c3c-0d010145040c" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from siri;]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="ca050298-5922-4f3b-aa2a-631aae03360a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="bulk-insert" doc:id="9eb0d655-4a6c-491e-8023-6ea593c71cf8" >
+		<http:listener doc:name="Listener" doc:id="14286203-9abd-47c3-8e2e-e713054dd887" config-ref="HTTP_Listener_config" path="/bulk"/>
+		<db:bulk-insert doc:name="Bulk insert" doc:id="9baa6491-fdb9-4b53-845b-995cad1110bd" config-ref="Database_Config">
+			<db:sql ><![CDATA[insert into siri(id,fname,lname,age) values(:id,:fname,:lname,:age)]]></db:sql>
+		</db:bulk-insert>
+		<ee:transform doc:name="Transform Message" doc:id="88b1481c-36d6-4f48-8fb1-ea88f993a864" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:select doc:name="Select" doc:id="9aa299b9-4811-4f66-ad16-d85fd9c25430" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from siri]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="198c21f0-4d38-4693-bb87-e3fe08bd27ea" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="bulk-update" doc:id="d607fe1b-400a-4fe2-aef4-b71fa1e63efb" >
+		<http:listener doc:name="Listener" doc:id="789fcc44-ea8c-4093-87df-efc95cb44334" config-ref="HTTP_Listener_config" path="/bulkupdate"/>
+		<db:bulk-update doc:name="Bulk update" doc:id="117f6f85-f0b2-4c39-abb3-e83d85311a6e" config-ref="Database_Config">
+			<db:sql ><![CDATA[update siri set fname=:fname,lname=:lname,age=:age where id=:id;]]></db:sql>
+		</db:bulk-update>
+		<ee:transform doc:name="Transform Message" doc:id="d9f94d56-9613-4314-9879-61a75f13d5e9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:select doc:name="Select" doc:id="874ed2b8-a73d-40c7-bc79-28e9c32d682e" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from siri;]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="540a0fab-d5f2-4d4d-9a6d-cfabe52a83a5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="payel-clsFlow1" doc:id="f1b6288e-3e8a-429b-a980-1fb39a30910c" >
+		<http:listener doc:name="Listener" doc:id="4f602e2a-52e6-445d-b60f-7e88c99c653c" config-ref="HTTP_Listener_config"/>
+		<logger level="INFO" doc:name="Logger" doc:id="853871e9-cefa-4e1d-9486-d3ec99221fda" />
+		<set-variable value="" doc:name="Set Variable" doc:id="a630eef1-bca1-4229-b560-2852f220d0a3" variableName="set "/>
+		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="9f909314-e536-4e21-a259-bdcf4eff0d54" />
+	</flow>
+	<sub-flow name="payel-clsSub_Flow" doc:id="1686d9dc-0f51-4c55-b187-e018cffd087b" />
+</mule>
